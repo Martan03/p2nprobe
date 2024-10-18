@@ -9,7 +9,7 @@ build:
 	fi
 	cd build && $(MAKE)
 
-run:
+run: build
 	./build/p2nprobe
 
 clean:
