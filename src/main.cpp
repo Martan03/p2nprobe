@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "args.hpp"
+#include "parser.hpp"
 
 void run(std::span<char*> argv);
 
@@ -25,8 +26,8 @@ void run(std::span<char*> argv) {
         return;
     }
 
-    std::cout << args.file.value_or("Not set") << std::endl;
-    std::cout << args.host.value_or("Not set") << ":" << args.port.value_or(0) << std::endl;
-    std::cout << args.active << std::endl;
-    std::cout << args.inactive << std::endl;
+    if (args.file.has_value()) {
+        auto parser = new Parser(args.file.value());
+        parser->parse();
+    }
 }
