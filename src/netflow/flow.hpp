@@ -51,6 +51,8 @@ struct NetflowV5Flow {
     /// @brief Unused (zero) bytes
     uint16_t pad2 = 0;
 
+    NetflowV5Flow() = default;
+
     NetflowV5Flow(FlowKey key, uint32_t uptime):
         src_addr(key.src_addr),
         dst_addr(key.dst_addr),

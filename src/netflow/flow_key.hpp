@@ -19,6 +19,8 @@ struct __attribute__ ((packed)) FlowKey {
     uint16_t dst_port;
     /// @brief IP type of service;
     uint8_t tos;
+
+    bool operator==(const FlowKey &) const = default;
 };
 
 template<> struct std::hash<FlowKey>

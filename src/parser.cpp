@@ -1,6 +1,7 @@
 /// Martin Slezák (xsleza26)
 
 #include "parser.hpp"
+#include "udp_client.hpp"
 
 #include <stdexcept>
 #include <iostream>
@@ -58,8 +59,6 @@ void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
     auto tcp_header = reinterpret_cast<const tcphdr*>(
         packet + ETH_HEADER_LEN + ip_header_len
     );
-
-    std::cout << "Packet length: " << header->len << " bytes" << std::endl;
 
     FlowKey key {
         .src_addr = *reinterpret_cast<const uint32_t*>(&ip_header->ip_src),
