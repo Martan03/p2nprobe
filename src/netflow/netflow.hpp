@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <chrono>
+#include <netinet/in.h>
 
 #include "flow_key.hpp"
 #include "flow.hpp"
@@ -23,7 +24,7 @@ struct __attribute__ ((packed)) NetflowV5Flow {
     /// @brief SNMP index of output interface
     uint16_t output = 0;
     /// @brief Packets in the flow
-    uint32_t d_pkts = 1;
+    uint32_t d_pkts;
     /// @brief Total number of Layer 3 bytes in packets of the flow
     uint32_t d_octets = 0;
     /// @brief SysUptime at start of flow (msecs)
@@ -55,28 +56,21 @@ struct __attribute__ ((packed)) NetflowV5Flow {
 
     NetflowV5Flow() = default;
 
-    NetflowV5Flow(FlowKey key, uint32_t uptime):
-        src_addr(key.src_addr),
-        dst_addr(key.dst_addr),
-        src_port(key.src_port),
-        dst_port(key.dst_port),
-        tos(key.tos),
-        first(uptime),
-        last(uptime)
-    {}
-
     NetflowV5Flow(Flow flow, std::chrono::system_clock::time_point uptime):
         src_addr(flow.src_addr),
         dst_addr(flow.dst_addr),
+        d_pkts(htonl(flow.d_pkts)),
+        d_octets(htonl(flow.d_octets)),
         src_port(flow.src_port),
         dst_port(flow.dst_port),
+        tcp_flags(flow.tcp_flags),
         tos(flow.tos)
     {
         using namespace std::chrono;
         auto fms = duration_cast<milliseconds>(flow.first - uptime);
-        first = static_cast<uint32_t>(fms.count());
+        first = htonl(static_cast<uint32_t>(fms.count()));
 
         auto lms = duration_cast<milliseconds>(flow.last - uptime);
-        last = static_cast<uint32_t>(lms.count());
+        last = htonl(static_cast<uint32_t>(lms.count()));
     }
 };

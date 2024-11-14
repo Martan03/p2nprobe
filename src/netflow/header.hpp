@@ -7,10 +7,11 @@
 
 #include <cstdint>
 #include <chrono>
+#include <netinet/in.h>
 
 struct __attribute__ ((packed)) NetflowV5Header {
     /// @brief Version of NetFlow (probably won't need this)
-    uint16_t version = 5;
+    uint16_t version = htons(5);
     /// @brief Number of flows exported in packet (1-30)
     uint16_t count = 0;
     /// @brief Milliseconds since export device booted
@@ -36,5 +37,21 @@ struct __attribute__ ((packed)) NetflowV5Header {
 
         unix_secs = static_cast<uint32_t>(secs.count());
         unix_nsecs = static_cast<uint32_t>(nsecs.count());
+    }
+
+    void endian_prep() {
+        count = htons(count);
+        sys_uptime = htonl(sys_uptime);
+        unix_secs = htonl(unix_secs);
+        unix_nsecs = htonl(unix_nsecs);
+        flow_sequence = htonl(flow_sequence);
+    }
+
+    void endian_unprep() {
+        count = ntohs(count);
+        sys_uptime = ntohl(sys_uptime);
+        unix_secs = ntohl(unix_secs);
+        unix_nsecs = ntohl(unix_nsecs);
+        flow_sequence = ntohl(flow_sequence);
     }
 };

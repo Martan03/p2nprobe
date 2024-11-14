@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "args.hpp"
-#include "netflow/header.hpp"
-#include "netflow/netflow.hpp"
+#include "../args.hpp"
+#include "../netflow/header.hpp"
+#include "../netflow/netflow.hpp"
 
 #include <cstdint>
 #include <string>
-#include <span>
+#include <vector>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -33,11 +33,11 @@ class UdpClient {
             }
         }
 
-        /// @brief Exports given flows
-        /// @param flows flows to be exported
-        void send(std::span<NetflowV5Flow> flows);
+        /// @brief Sends data to the machine given by hostname and port
+        /// @param data data to be send
+        void send(std::vector<char> data);
 
     private:
         int socket_fd = -1;
-        sockaddr_in addr;
+        std::vector<char> addr;
 };

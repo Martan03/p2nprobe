@@ -14,9 +14,13 @@ Args Args::parse(std::span<char*> argv) {
         char* pos;
 
         if (std::strcmp(*arg, "-a") == 0) {
-            args.active = Args::parse_num(arg, argv.end());
+            args.active = std::chrono::seconds(
+                Args::parse_num(arg, argv.end())
+            );
         } else if (std::strcmp(*arg, "-i") == 0) {
-            args.inactive = Args::parse_num(arg, argv.end());
+            args.inactive = std::chrono::seconds(
+                Args::parse_num(arg, argv.end())
+            );
         } else if (
             std::strcmp(*arg, "-h") == 0 ||
             std::strcmp(*arg, "--help") == 0

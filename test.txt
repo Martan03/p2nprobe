@@ -1,0 +1,199 @@
+Header:
+  version   : 5
+  count     : 12
+  sys_uptime: 1ms
+  time      : 2024-11-14 17:23:21.302635484
+  flow seq  : 12
+  eng type  : 0
+  eng id    : 0
+  sampling  : 0:0
+Flows:
+-----
+  src     : 147.229.14.56:50868
+  dst     : 147.229.12.101:445
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 3
+  data    : 0
+  first   : 1521842708 [2024-12-02 08:07:24.011635484]
+  last    : 1521902707 [2024-12-02 08:08:24.010635484]
+  flags   : 24
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.12.101:445
+  dst     : 147.229.14.56:50868
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 2
+  data    : 0
+  first   : 1521842708 [2024-12-02 08:07:24.011635484]
+  last    : 1521902708 [2024-12-02 08:08:24.011635484]
+  flags   : 24
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.56:50868
+  dst     : 147.229.12.101:445
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 3
+  data    : 0
+  first   : 1521842708 [2024-12-02 08:07:24.011635484]
+  last    : 1521902707 [2024-12-02 08:08:24.010635484]
+  flags   : 24
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.150:61760
+  dst     : 147.229.14.56:445
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 2
+  data    : 0
+  first   : 1521844435 [2024-12-02 08:07:25.738635484]
+  last    : 1521847438 [2024-12-02 08:07:28.741635484]
+  flags   : 6
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.150:61761
+  dst     : 147.229.14.56:139
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 1
+  data    : 0
+  first   : 1521844435 [2024-12-02 08:07:25.738635484]
+  last    : 1521844435 [2024-12-02 08:07:25.738635484]
+  flags   : 2
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.56:139
+  dst     : 147.229.14.150:61761
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 3
+  data    : 0
+  first   : 1521844436 [2024-12-02 08:07:25.739635484]
+  last    : 1521844437 [2024-12-02 08:07:25.740635484]
+  flags   : 19
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.150:61761
+  dst     : 147.229.14.56:139
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 4
+  data    : 0
+  first   : 1521844436 [2024-12-02 08:07:25.739635484]
+  last    : 1521844438 [2024-12-02 08:07:25.741635484]
+  flags   : 17
+  prot    : 6
+  tos     : 32
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.150:61762
+  dst     : 147.229.14.56:139
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 20
+  data    : 0
+  first   : 1521844438 [2024-12-02 08:07:25.741635484]
+  last    : 1521844450 [2024-12-02 08:07:25.753635484]
+  flags   : 27
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.56:139
+  dst     : 147.229.14.150:61762
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 10
+  data    : 0
+  first   : 1521844438 [2024-12-02 08:07:25.741635484]
+  last    : 1521844450 [2024-12-02 08:07:25.753635484]
+  flags   : 27
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.56:445
+  dst     : 147.229.14.150:61760
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 1
+  data    : 0
+  first   : 1521847438 [2024-12-02 08:07:28.741635484]
+  last    : 1521847438 [2024-12-02 08:07:28.741635484]
+  flags   : 18
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.229.14.56:50868
+  dst     : 147.229.12.101:445
+  hop     : 0.0.0.0
+  input   : 0
+  output  : 0
+  pkts    : 3
+  data    : 0
+  first   : 1521902907 [2024-12-02 08:08:24.210635484]
+  last    : 1521938907 [2024-12-02 08:09:00.210635484]
+  flags   : 24
+  prot    : 6
+  tos     : 0
+  src as  : 0
+  dst as  : 0
+  src mask: 0
+  dst mask: 0
+-----
+  src     : 147.22

@@ -1,12 +1,10 @@
 /// Martin Slezák (xsleza26)
 
 #include "parser.hpp"
-#include "udp_client.hpp"
 
 #include <stdexcept>
 #include <iostream>
 #include <netinet/ip.h>
-#include <netinet/tcp.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 
@@ -14,9 +12,9 @@
 #define ETH_HEADER_LEN 14
 
 Parser::Parser(Args args):
-    flows(),
-    header(),
-    client(args)
+    args(args),
+    exporter(args),
+    flows()
 {
     pcap = pcap_open_offline(args.file.value().c_str(), err_buf);
     if (pcap == nullptr) {
@@ -31,18 +29,21 @@ void Parser::parse() {
     const u_char *packet;
 
     while (int ret = pcap_next_ex(pcap, &header, &packet) >= 0) {
-        check_actives();
         if (ret == 0)
             continue;
 
         process_packet(header, packet);
     }
 
+    flush();
+    exporter.flush();
     pcap_close(pcap);
 }
 
 void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
     auto eth = reinterpret_cast<const ether_header*>(packet);
+
+    auto size = header->len - ETH_HEADER_LEN;
     auto ip_header = reinterpret_cast<const ip*>(packet + ETH_HEADER_LEN);
     int ip_header_len = ip_header->ip_hl * 4;
     if (ip_header_len < 20) {
@@ -70,41 +71,67 @@ void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
         .tos = ip_header->ip_tos,
     };
 
+    auto now = packet_time(header->ts);
     if (flows.contains(key)) {
-        update_flow(key, header->ts);
+        update_flow(key, now, size, tcp_header);
     } else {
-        create_flow(key, header->ts);
+        create_flow(key, now, size, tcp_header);
     }
+
+    check_actives(now);
 }
 
-void Parser::update_flow(FlowKey key, timeval time) {
+void Parser::update_flow(
+    FlowKey key,
+    std::chrono::system_clock::time_point time,
+    uint32_t size,
+    const tcphdr *header
+) {
     auto flow = flows[key];
 
-    if (check_inactive(flow)) {
-        // TODO: send flow
-        create_flow(key, time);
+    if (check_inactive(flow, time) || check_active(flow, time)) {
+        exporter.export_flow(flow);
+        Flow flow(key, time);
+        flow.tcp_flags = header->th_flags;
+        flows[key] = flow;
         return;
     }
 
     // TODO: edit all values
     flow.d_pkts++;
-    flow.last = packet_time(time);
+    flow.last = time;
+    flow.tcp_flags |= header->th_flags;
     flows[key] = flow;
 }
 
-void Parser::create_flow(FlowKey key, timeval time) {
+void Parser::create_flow(
+    FlowKey key,
+    std::chrono::system_clock::time_point time,
+    uint32_t size,
+    const tcphdr *header
+) {
     // TODO: add all values
-    Flow flow(key, packet_time(time));
+    Flow flow(key, time);
+    flow.tcp_flags = header->th_flags;
     flows[key] = flow;
     flow_queue.push(key);
 }
 
-void Parser::check_actives() {
-    auto n = std::chrono::system_clock::now();
-    while (flow_queue.empty() && check_active(flows[flow_queue.front()], n)) {
+void Parser::flush() {
+    while (!flow_queue.empty()) {
         auto flow_key = flow_queue.front();
-        // TODO: add flow sending
+        exporter.export_flow(flows[flow_key]);
         flow_queue.pop();
+        flows.erase(flow_key);
+    }
+}
+
+void Parser::check_actives(std::chrono::system_clock::time_point n) {
+    while (!flow_queue.empty() && check_active(flows[flow_queue.front()], n)) {
+        auto flow_key = flow_queue.front();
+        exporter.export_flow(flows[flow_key]);
+        flow_queue.pop();
+        flows.erase(flow_key);
     }
 }
 
@@ -113,14 +140,17 @@ bool Parser::check_active(
     std::chrono::system_clock::time_point now
 ) {
     using namespace std::chrono;
-    auto secs = duration_cast<seconds>(now - flow.first);
-    return uint32_t(secs.count()) >= args.active;
+    auto secs = now - flow.first;
+    return secs >= args.active;
 }
 
-bool Parser::check_inactive(Flow flow) {
+bool Parser::check_inactive(
+    Flow flow,
+    std::chrono::system_clock::time_point now
+) {
     using namespace std::chrono;
-    auto secs = duration_cast<seconds>(flow.last - flow.first);
-    return uint32_t(secs.count()) >= args.inactive;
+    auto secs = now - flow.first;
+    return secs >= args.inactive;
 }
 
 std::chrono::system_clock::time_point Parser::packet_time(timeval t) {

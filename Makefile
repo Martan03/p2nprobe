@@ -7,7 +7,7 @@ build:
 		mkdir build; \
 		cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug; \
 	fi
-	cd build && $(MAKE)
+	cd build && $(MAKE) -j 12
 
 run: build
 	./build/p2nprobe

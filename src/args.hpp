@@ -6,6 +6,7 @@
 #include <string>
 #include <optional>
 #include <span>
+#include <chrono>
 
 class Args {
     public:
@@ -17,9 +18,9 @@ class Args {
         std::optional<std::uint16_t> port;
 
         /// @brief active timeout
-        unsigned active = 60;
+        std::chrono::seconds active { 60 };
         /// @brief inactive timeout
-        unsigned inactive = 60;
+        std::chrono::seconds inactive { 60 };
 
         /// @brief whether to show help or not
         bool help = false;
