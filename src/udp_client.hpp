@@ -2,18 +2,24 @@
 
 #pragma once
 
+#include "args.hpp"
 #include "netflow/header.hpp"
-#include "netflow/flow.hpp"
+#include "netflow/netflow.hpp"
 
 #include <cstdint>
 #include <string>
 #include <span>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <netinet/in.h>
 #include <unistd.h>
 
 class UdpClient {
     public:
+        /// @brief Creates new UDP client
+        /// @param args arguments containing the hostname and port
+        UdpClient(Args args);
+
         /// @brief Creates new UDP client
         /// @param hostname hostname of the server to connect to
         /// @param port port of the server to connect to

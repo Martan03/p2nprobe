@@ -7,6 +7,10 @@
 #include <cstring>
 #include <vector>
 
+UdpClient::UdpClient(Args args) {
+    UdpClient(args.host.value(), args.port.value());
+}
+
 // TODO: throw exception instead of printing the error
 UdpClient::UdpClient(std::string hostname, std::uint16_t port):
     addr()

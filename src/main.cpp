@@ -27,7 +27,7 @@ void run(std::span<char*> argv) {
     }
 
     if (args.file.has_value()) {
-        auto parser = new Parser(args.file.value());
+        auto parser = new Parser(args);
         parser->parse();
     }
 }
