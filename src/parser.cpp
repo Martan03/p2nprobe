@@ -40,6 +40,8 @@ void Parser::parse() {
     pcap_close(pcap);
 }
 
+/// This function was inspired by code on this website:
+/// https://www.tcpdump.org/pcap.html
 void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
     auto eth = reinterpret_cast<const ether_header*>(packet);
 
@@ -97,8 +99,8 @@ void Parser::update_flow(
         return;
     }
 
-    // TODO: edit all values
     flow.d_pkts++;
+    flow.d_octets += size;
     flow.last = time;
     flow.tcp_flags |= header->th_flags;
     flows[key] = flow;
@@ -110,8 +112,8 @@ void Parser::create_flow(
     uint32_t size,
     const tcphdr *header
 ) {
-    // TODO: add all values
     Flow flow(key, time);
+    flow.d_octets += size;
     flow.tcp_flags = header->th_flags;
     flows[key] = flow;
     flow_queue.push(key);

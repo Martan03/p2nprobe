@@ -19,8 +19,11 @@
 
 class Parser {
     public:
+        /// @brief Constructs new parser
+        /// @param args input arguments (expects that optinal values are set)
         Parser(Args args);
 
+        /// @brief Parses the pcap file given by arguments
         void parse();
 
     private:
@@ -36,6 +39,9 @@ class Parser {
 
         std::chrono::system_clock::time_point uptime;
 
+        /// @brief Processes the given packet when TCP, otherwise ignores it
+        /// @param header header of the packet
+        /// @param packet packet content
         void process_packet(pcap_pkthdr *header, const u_char *packet);
 
         /// @brief Update the flow

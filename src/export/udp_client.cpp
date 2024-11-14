@@ -11,19 +11,13 @@ UdpClient::UdpClient(Args args):
     UdpClient(args.host.value(), args.port.value())
 {}
 
-// TODO: throw exception instead of printing the error
 UdpClient::UdpClient(std::string hostname, std::uint16_t port) {
     addrinfo *res;
 
-    int status = getaddrinfo(
-        hostname.c_str(),
-        std::to_string(port).c_str(),
-        nullptr,
-        &res
-    );
+    auto sport = std::to_string(port).c_str();
+    int status = getaddrinfo(hostname.c_str(), sport, nullptr, &res);
     if (status != 0) {
-        std::cerr << "Error resolving the hostname" << std::endl;
-        return;
+        throw std::runtime_error("Error resolving the hostname");
     }
 
     addr = std::vector<char>(res->ai_addrlen);
@@ -34,8 +28,7 @@ UdpClient::UdpClient(std::string hostname, std::uint16_t port) {
     freeaddrinfo(res);
 
     if (socket_fd < 0) {
-        std::cerr << "Error creating socket" << std::endl;
-        return;
+        throw std::runtime_error("Error creating socket");
     }
 }
 
@@ -44,7 +37,6 @@ void UdpClient::send(std::vector<char> data) {
     ssize_t sent =
         sendto(socket_fd, data.data(), data.size(), 0, sock_addr, addr.size());
     if (sent < 0) {
-        perror("");
-        std::cerr << "Error sending data" << std::endl;
+        throw std::runtime_error("Error sending data");
     }
 }

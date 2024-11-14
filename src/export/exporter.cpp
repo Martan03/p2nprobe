@@ -3,7 +3,6 @@
 #include "exporter.hpp"
 
 #include <cstring>
-#include <iostream>
 
 Exporter::Exporter(Args args):
     uptime(std::chrono::system_clock::now()),
@@ -39,8 +38,6 @@ void Exporter::flush() {
 
     header.count = 0;
     flows.clear();
-
-    std::cout << "Flows sent" << std::endl;
 }
 
 uint32_t Exporter::get_elapsed_ms() {

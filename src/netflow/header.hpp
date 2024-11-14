@@ -39,6 +39,7 @@ struct __attribute__ ((packed)) NetflowV5Header {
         unix_nsecs = static_cast<uint32_t>(nsecs.count());
     }
 
+    /// @brief Converts values from little endian to big endian
     void endian_prep() {
         count = htons(count);
         sys_uptime = htonl(sys_uptime);
@@ -47,6 +48,7 @@ struct __attribute__ ((packed)) NetflowV5Header {
         flow_sequence = htonl(flow_sequence);
     }
 
+    /// @brief Converts values from big endian to little endian
     void endian_unprep() {
         count = ntohs(count);
         sys_uptime = ntohl(sys_uptime);

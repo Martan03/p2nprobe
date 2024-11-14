@@ -30,6 +30,10 @@ class Args {
         /// @return parsed arguments
         static Args parse(std::span<char*> argv);
 
+        /// @brief Checks if required fields are filled in
+        /// Throws exception when required field is not filled
+        void check_required();
+
         /// @brief Prints the program help
         static void print_help();
 

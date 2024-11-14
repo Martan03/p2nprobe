@@ -34,6 +34,16 @@ Args Args::parse(std::span<char*> argv) {
     return args;
 }
 
+void Args::check_required() {
+    if (!file.has_value()) {
+        throw std::invalid_argument("Missing required PCAP file path");
+    } else if (!host.has_value() || !port.has_value()) {
+        throw std::invalid_argument(
+            "Hostname and port required (in format hostaname:port)"
+        );
+    }
+}
+
 std::string Args::next_arg(
     std::span<char*>::iterator& arg,
     std::span<char*>::iterator end

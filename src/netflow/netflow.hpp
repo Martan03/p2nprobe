@@ -56,6 +56,9 @@ struct __attribute__ ((packed)) NetflowV5Flow {
 
     NetflowV5Flow() = default;
 
+    /// @brief Creates new NetflowV5Flow and converts from little to big endian
+    /// @param flow flow to create NetflowV5Flow from
+    /// @param uptime current exporter uptime
     NetflowV5Flow(Flow flow, std::chrono::system_clock::time_point uptime):
         src_addr(flow.src_addr),
         dst_addr(flow.dst_addr),
