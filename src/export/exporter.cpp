@@ -24,6 +24,10 @@ void Exporter::export_flow(Flow flow) {
 }
 
 void Exporter::flush() {
+    if (flows.empty()) {
+        return;
+    }
+
     header.sys_uptime = get_elapsed_ms();
 
     auto flows_size = flows.size() * sizeof(NetflowV5Flow);

@@ -76,4 +76,18 @@ struct __attribute__ ((packed)) NetflowV5Flow {
         auto lms = duration_cast<milliseconds>(flow.last - uptime);
         last = htonl(static_cast<uint32_t>(lms.count()));
     }
+
+    /// @brief Converts all values to big endian
+    void to_be() {
+        input = ntohs(input);
+        output = ntohs(output);
+        d_pkts = ntohl(d_pkts);
+        d_octets = ntohl(d_octets);
+        first = ntohl(first);
+        last = ntohl(last);
+        src_port = ntohs(src_port);
+        dst_port = ntohs(dst_port);
+        src_as = ntohs(src_as);
+        dst_as = ntohs(dst_as);
+    }
 };

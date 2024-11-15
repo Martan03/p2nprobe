@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <string_view>
 
+#include "../packet.hpp"
+
 struct __attribute__ ((packed)) FlowKey {
     /// @brief Source IP address
     uint32_t src_addr;
@@ -21,6 +23,14 @@ struct __attribute__ ((packed)) FlowKey {
     uint8_t tos;
 
     bool operator==(const FlowKey &) const = default;
+
+    FlowKey(Packet packet):
+        src_addr(packet.src_addr),
+        dst_addr(packet.dst_addr),
+        src_port(packet.src_port),
+        dst_port(packet.dst_port),
+        tos(packet.tos)
+    {}
 };
 
 template<> struct std::hash<FlowKey>

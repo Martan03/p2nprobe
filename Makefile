@@ -9,6 +9,10 @@ build:
 	cd build && $(MAKE) -j 12
 	mv build/p2nprobe .
 
+.PHONY: n2tcap
+n2tprobe:
+	cd n2tcap && make
+
 .PHONY: run
 run: build
 	./p2nprobe

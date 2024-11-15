@@ -43,16 +43,25 @@ void Parser::parse() {
 /// This function was inspired by code on this website:
 /// https://www.tcpdump.org/pcap.html
 void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
-    // TODO: check ether type
-    // auto eth = reinterpret_cast<const ether_header*>(packet);
-    auto size = header->len - ETH_HEADER_LEN;
-    auto ip_header = reinterpret_cast<const ip*>(packet + ETH_HEADER_LEN);
-    int ip_header_len = ip_header->ip_hl * 4;
-    if (ip_header_len < 20) {
+    auto eth = reinterpret_cast<const ether_header*>(packet);
+    // Skips packets that are not IP packets
+    auto eth_type = ntohs(eth->ether_type);
+    if (eth_type != ETHERTYPE_IP) {
         return;
     }
 
-    if (ip_header->ip_p != IPPROTO_TCP) {
+    Packet parsed;
+    parsed.size = header->len - ETH_HEADER_LEN;
+    parsed.time = packet_time(header->ts);
+
+    process_ip(parsed, packet + ETH_HEADER_LEN);
+}
+
+void Parser::process_ip(Packet parsed, const u_char *packet) {
+    auto ip_header = reinterpret_cast<const ip*>(packet);
+    int ip_header_len = ip_header->ip_hl * 4;
+    // Stops processing when invalid IP header or not TCP
+    if (ip_header_len < 20 || ip_header->ip_p != IPPROTO_TCP) {
         return;
     }
 
@@ -60,61 +69,52 @@ void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
     char dst_ip[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &(ip_header->ip_src), src_ip, INET_ADDRSTRLEN);
     inet_ntop(AF_INET, &(ip_header->ip_dst), dst_ip, INET_ADDRSTRLEN);
+    parsed.src_addr = *reinterpret_cast<const uint32_t*>(&ip_header->ip_src);
+    parsed.dst_addr = *reinterpret_cast<const uint32_t*>(&ip_header->ip_dst);
 
-    auto tcp_header = reinterpret_cast<const tcphdr*>(
-        packet + ETH_HEADER_LEN + ip_header_len
-    );
+    parsed.tos = ip_header->ip_tos;
 
-    FlowKey key {
-        .src_addr = *reinterpret_cast<const uint32_t*>(&ip_header->ip_src),
-        .dst_addr = *reinterpret_cast<const uint32_t*>(&ip_header->ip_dst),
-        .src_port = tcp_header->source,
-        .dst_port = tcp_header->dest,
-        .tos = ip_header->ip_tos,
-    };
-
-    auto now = packet_time(header->ts);
-    if (flows.contains(key)) {
-        update_flow(key, now, size, tcp_header);
-    } else {
-        create_flow(key, now, size, tcp_header);
-    }
-
-    check_actives(now);
+    process_tcp(parsed, packet + ip_header_len);
 }
 
-void Parser::update_flow(
-    FlowKey key,
-    std::chrono::system_clock::time_point time,
-    uint32_t size,
-    const tcphdr *header
-) {
+void Parser::process_tcp(Packet parsed, const u_char *packet) {
+    auto tcp_header = reinterpret_cast<const tcphdr*>(packet);
+
+    parsed.src_port = tcp_header->source;
+    parsed.dst_port = tcp_header->dest;
+    parsed.tcp_flags = tcp_header->th_flags;
+
+    FlowKey key(parsed);
+    if (flows.contains(key)) {
+        update_flow(key, parsed);
+    } else {
+        create_flow(key, parsed);
+    }
+
+    check_actives(parsed.time);
+}
+
+void Parser::update_flow(FlowKey key, Packet parsed) {
     auto flow = flows[key];
 
-    if (check_inactive(flow, time) || check_active(flow, time)) {
+    if (check_inactive(flow, parsed.time) || check_active(flow, parsed.time)) {
         exporter.export_flow(flow);
-        Flow flow(key, time);
-        flow.tcp_flags = header->th_flags;
+        Flow flow(parsed);
         flows[key] = flow;
         return;
     }
 
     flow.d_pkts++;
-    flow.d_octets += size;
-    flow.last = time;
-    flow.tcp_flags |= header->th_flags;
+    flow.d_octets += parsed.size;
+    flow.last = parsed.time;
+    flow.tcp_flags |= parsed.tcp_flags;
     flows[key] = flow;
 }
 
-void Parser::create_flow(
-    FlowKey key,
-    std::chrono::system_clock::time_point time,
-    uint32_t size,
-    const tcphdr *header
-) {
-    Flow flow(key, time);
-    flow.d_octets += size;
-    flow.tcp_flags = header->th_flags;
+void Parser::create_flow(FlowKey key, Packet parsed) {
+    Flow flow(parsed);
+    flow.d_octets += parsed.size;
+    flow.tcp_flags = parsed.tcp_flags;
     flows[key] = flow;
     flow_queue.push(key);
 }

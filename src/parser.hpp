@@ -11,6 +11,7 @@
 #include <netinet/tcp.h>
 
 #include "args.hpp"
+#include "packet.hpp"
 #include "netflow/flow_key.hpp"
 #include "netflow/flow.hpp"
 #include "netflow/netflow.hpp"
@@ -44,25 +45,25 @@ class Parser {
         /// @param packet packet content
         void process_packet(pcap_pkthdr *header, const u_char *packet);
 
+        /// @brief Processes IP packet
+        /// @param parsed parsed packet details
+        /// @param packet ip packet content
+        void process_ip(Packet parsed, const u_char *packet);
+
+        /// @brief Processes TCP packet
+        /// @param parsed parsed packet details
+        /// @param packet tcp packet content
+        void process_tcp(Packet parsed, const u_char *packet);
+
         /// @brief Update the flow
         /// @param key flow key
         /// @param time time of arrival
-        void update_flow(
-            FlowKey key,
-            std::chrono::system_clock::time_point time,
-            uint32_t size,
-            const tcphdr *header
-        );
+        void update_flow(FlowKey key, Packet parsed);
 
         /// @brief Creates new flow and saves it to flows
         /// @param key flow key
         /// @param time time of arrival
-        void create_flow(
-            FlowKey key,
-            std::chrono::system_clock::time_point time,
-            uint32_t size,
-            const tcphdr *header
-        );
+        void create_flow(FlowKey key, Packet parsed);
 
         /// @brief Flushes all the flows from the queue
         void flush();

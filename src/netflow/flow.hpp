@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <chrono>
 
+#include "../packet.hpp"
 #include "flow_key.hpp"
 
 struct Flow {
@@ -30,6 +31,18 @@ struct Flow {
     uint8_t tos;
 
     Flow() = default;
+
+    Flow(Packet packet):
+        src_addr(packet.src_addr),
+        dst_addr(packet.dst_addr),
+        d_octets(packet.size),
+        first(packet.time),
+        last(packet.time),
+        src_port(packet.src_port),
+        dst_port(packet.dst_port),
+        tcp_flags(packet.tcp_flags),
+        tos(packet.tos)
+    {}
 
     Flow(FlowKey key, std::chrono::system_clock::time_point uptime):
         src_addr(key.src_addr),

@@ -26,6 +26,6 @@ void run(std::span<char*> argv) {
     }
 
     args.check_required();
-    auto parser = new Parser(args);
-    parser->parse();
+    Parser parser(args);
+    parser.parse();
 }

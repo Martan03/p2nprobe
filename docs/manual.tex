@@ -191,6 +191,25 @@ pošle paket na flow collector, kterého adresa a port je nastavena při spušt�
 programu. Po přečtení celého PCAP souboru se odešle paket, který nemusí být
 plně naplněn.
 
+\section{Návod na použití}
+Pro spuštění programu samotného je nejprve potřeba ho kompilovat, to můžeme
+udělat spuštěním Makefile (příkaz \texttt{make}).
+
+\section{Testování}
+Abych si mohl otestovat, že se Netflow exportuje jak má, tak jsem si
+naprogramoval Netflow collector. Tento program očekává pakety na dané adrese
+a portu a po přijetí vytiskne informace z Netflow. Díky tomu jsem si mohl
+zkontroloval, jestli jednotlivé hodnoty dávají smysl a také, jestli používám
+správný endianness.
+
+Výstup tohoto programu jsem ještě zkontroloval s Wiresharkem, kde jsem si
+otevřel PCAP soubor, který jsem používal a zkontroloval jsem IP adresy, porty
+a ostatní informace, které se daly z Wiresharku přečíst.
+
+Při prvním běhu testu jsem objevil, že jsem zapomněl u některých hodnot řešit
+endianness. Po opravě však jednotlivé informace odpovídali informacích z
+Wiresharku, tudíž jsem považoval test za úspěšný.
+
 \nocite{*}
 \printbibliography[title={Reference}]
 
