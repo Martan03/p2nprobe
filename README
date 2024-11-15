@@ -13,16 +13,17 @@
 
 ## Popis programu
 
-Program analyzuje komunikaci z daného `.pcap` souboru a exportuje pomocí
-protokolu Netflow ve verzi 5.
+Program sbírá data o komunikaci z daného `.pcap` souboru a exportuje
+pomocí protokolu Netflow ve verzi 5.
 
 ### Flows
 
-Analyzována je pouze komunikace TCP, ostatní provoz se neanalyzuje. Jednotlivé
-pakety se rozdělí do takzvaných flows, kdy flow je jednoznačně určena zdrojovou
-IP adresou a portem paketu, cílovou IP adresou a portem paketu a také typem IP
-služby (ToS). Flow také obsahuje další informace o skupině paketů, jako
-například počet paketů, velikost a tak dále.
+Sbírány jsou pouze data komunikace TCP, ostatní provoz se nesbírá.
+Jednotlivé pakety se rozdělí do takzvaných flows, kdy flow je
+jednoznačně určena zdrojovou IP adresou a portem paketu, cílovou IP
+adresou a portem paketu a také typem IP služby (ToS). Flow také obsahuje
+další informace o skupině paketů, jako například počet paketů, velikost
+a tak dále.
 
 ### Timeouty
 

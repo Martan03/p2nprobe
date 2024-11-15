@@ -14,8 +14,8 @@ UdpClient::UdpClient(Args args):
 UdpClient::UdpClient(std::string hostname, std::uint16_t port) {
     addrinfo *res;
 
-    auto sport = std::to_string(port).c_str();
-    int status = getaddrinfo(hostname.c_str(), sport, nullptr, &res);
+    auto sport = std::to_string(port);
+    int status = getaddrinfo(hostname.c_str(), sport.c_str(), nullptr, &res);
     if (status != 0) {
         throw std::runtime_error("Error resolving the hostname");
     }

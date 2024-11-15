@@ -1,0 +1,197 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[czech]{babel}
+\usepackage{csquotes}
+
+\usepackage{biblatex}
+\addbibresource{manual.bib}
+
+% Title, Author, Date
+\title{PCAP NetFlow v5 exportér}
+\author{Martin Slezák (xsleza26)}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Základní popis projektu}
+
+Tento projekt implementuje sbírání dat o komunikaci dané PCAP souborem a
+exportuje posbírané informace pomocí protokolu Netflow ve verzi 5.
+
+\section{Popis Netflow}
+
+Netflow bylo představeno společností Cisco na jejich routerech okolo roku 1996.
+Tato funkcionalita umožňuje sbírat data o IP komunikaci. Když se poté Netflow
+analyzuje, síťový administrátor může zjistit různé informace o komunikaci, jako
+třeba zdroj a cíl komunikace nebo také kolik paketů v dané komunikaci bylo
+posláno.
+
+\subsection{Monitorování}
+
+Monitorování pomocí Netflow je složeno ze tří částí:
+\begin{itemize}
+    \item \textbf{Flow exporter:} pakety se seskupují do flows a exportují
+    \item \textbf{Flow collector:} přijímá flows od exportéru, ukládá a
+        předzpracovává
+    \item \textbf{Analýza:} analyzuje přijaté flows
+        (detekce narušení, profilování,...)
+\end{itemize}
+
+\subsection{Hlavička Netflow}
+
+Netflow ve verzi 5 obsahuje na začátku každého paketu hlavičku, která obsahuje
+základní informace, jako je třeba verze netflow, ale také například kolik
+jednotlivých flow je v daném paketu obsaženo. Konkrétní hodnoty, které jsou
+v hlavičce obsaženy jsou:
+\begin{itemize}
+    \item Verze Netflow
+    \item Počet paketů exportovaných v paketu
+    \item Aktuální čas v milisekundách od spuštění exportéru
+    \item Počet sekund od roku 1970
+    \item Počet nanosekund od roku 1970
+    \item Celkový počet viděných flows
+    \item Typ flow-switching enginu
+    \item Číslo slotu flow-switching enginu
+    \item První dva bity obsahují mód vzorkování, ostatní interval vzorkování
+\end{itemize}
+
+\subsection{Flow identifikátor}
+\label{sec:flow-key}
+
+Pro identifikaci flow a seskupování paketů do odpovídající flow se v Netflow
+ve verzi 5 využívá klíč, který obsahuje sedm hodnot:
+\begin{enumerate}
+    \item Rozhraní ingres
+    \item Zdrojové IP adresy
+    \item Cílové IP adresy
+    \item Číslo IP protokolu
+    \item Zdrojový port UDP/TCP
+    \item Cílový port UDP/TCP
+    \item Typ služby IP (ToS)
+\end{enumerate}
+
+\subsection{Flow záznam}
+\label{sec:flow-record}
+
+Pakety jsou seskupeny do záznamu flow. Flow v Netflow ve verzi 5 obsahuje:
+
+\begin{itemize}
+    \item Zdrojovou IP adresu
+    \item Cílovou IP adresu
+    \item IP adresa nexthop routeru
+    \item SNMP index vstupního rozhraní
+    \item SNMP index výstupního rozhraní
+    \item Počet paketů ve flow
+    \item Celkový počet bytů v L3 v paketech flow
+    \item Čas prvního paketu od spuštění exportéru
+    \item Čas posledního paketu od spuštění exportéru
+    \item Zdrojový port TCP/UDP nebo ekvivalent
+    \item Cílový port TCP/UDP nebo ekvivalent
+    \item Nevyužitý byte
+    \item OR TCP flagů všech paketů
+    \item Číslo IP protokolu
+    \item Typ IP služby (ToS)
+    \item Číslo autonomního systému zdroje, buď origin nebo peer
+    \item Číslo autonomního systému cíle, buď origin nebo peer
+    \item Bity prefix masky zdrojové IP adresy
+    \item Bity prefix masky cílové IP adresy
+    \item Nevyužité byty
+\end{itemize}
+
+\section{Popis implementace}
+
+Tento projekt implementuje pouze jednu z částí monitorování komunikace pomocí
+Netflow a to flow exportér.
+
+Implementace flow exporéru by se dala rozdělit do tří hlavních částí:
+\begin{itemize}
+    \item Přijetí a parsování paketu
+    \item Seskupování paketů do flows
+    \item Exportování flows
+\end{itemize}
+
+\subsection{Přijetí a parsování paketu}
+
+Samotná implementace přijetí a parsování paketu je pomocí knihovny pcap. Ta
+umožňuje čtení PCAP souboru a následné čtení jednotlivých paketů. Každý paket
+se následně parsuje, aby se získaly všechna potřebná data. Tuto funkcionalitu
+přijimání paketu imlementuje metoda parse ve třídě Parser (soubor parser.cpp).
+
+Parsování paketů je v podstatě pouze přetypování bytů dat na odpovídající
+strukturu, jako třeba ip, tcphdr. Následně se z těchto struktur dá přečíst
+potřebná data.
+
+\subsection{Seskupování paketů do flows}
+
+Z parsovaných dat lze následně sestavit jednotlivé flows. Flow v Netflow ve
+verzi 5 je jednoznačně identifikována pomocí klíče, který byl popsán v sekci
+\hyperref[sec:flow-key]{flow indentifikátor}.
+
+V samotné implementaci nám ale budou stačit pouze některé hodnoty z výše
+uvedené jednoznačné identifikace. Implementovaný exportér podporuje pouze
+komunikaci TCP, nepotřebujeme tedy číslo IP protokolu. Nebudeme také potřebovat
+rozhraní ingres. Výsledný klíč flow bude tedy vypadat následovně:
+\begin{itemize}
+    \item Zdrojová IP adresa
+    \item Cílová IP adresa
+    \item Zdrojový port TCP
+    \item Cílový port TCP
+    \item Typ služby IP (ToS)
+\end{itemize}
+
+Tento klíč je implementován jako struktura FlowKey, která obsahuje jak potřebné
+hodnoty, tak i implementuje hašování.
+
+Z přijatého a parsovaného paketu se sestaví výše zmíněný klíč, na základě
+kterého se upraví existující flow nebo vytvoří nová v případě, že ještě
+neexistuje. Do flow jsou uloženy veškeré informace, které má flow obsahovat
+(dle popisu v sekci \hyperref[sec:flow-record]{flow záznam}).
+
+\subsection{Exportování flows}
+
+Flow se exportují v několika případech:
+\begin{itemize}
+    \item Aktivní časový limit
+    \item Neaktivní časový limit
+    \item Konec PCAP souboru
+\end{itemize}
+
+\subsubsection{Aktivní časový limit}
+První případ je po vypršení aktivního časového limitu. Časový limit se
+nastavuje při spuštění programu (výchozí hodnota je 60 sekund). Tento časový
+limit určuje maximální čas od přijetí prvního paketu v dané flow. Jakmile je
+čas od přijetí prvního paketu vyšší než nastavená hodnota, flow je ukončena
+a předána k exportu.
+
+\subsubsection{Neaktivní časový limit}
+Druhý případ je po vypršení neaktivního časového limitu. Podobně jako u
+aktivního časového limitu je při spuštění programu nastavena jeho hodnota
+(výchozí je 60 sekund). Neaktivní timeout určuje maximální dobu, kdy nepřijde
+žádný paket do dané flow. Jaklmile je čas posledního přijatého paketu vyšší
+než nastavená hodnota, flow se ukončí a předá k exportu.
+
+\subsubsection{Konec PCAP souboru}
+Poslední případ je dočtení souboru PCAP, kdy chceme odeslat zbylé flows.
+Všechny flows, u kterých ještě nevypršel ani jeden z časových limitů se předají
+exportéru.
+
+\subsubsection{Exportér}
+Exportér jako takový sbírá exportované flows a čeká, dokud nebude mít 29
+záznamů flow. Poté vytvoří paket složený z Netflow hlavičky a flow záznamů a
+pošle paket na flow collector, kterého adresa a port je nastavena při spuštění
+programu. Po přečtení celého PCAP souboru se odešle paket, který nemusí být
+plně naplněn.
+
+\nocite{*}
+\printbibliography[title={Reference}]
+
+\end{document}
