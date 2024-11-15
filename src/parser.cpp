@@ -43,8 +43,8 @@ void Parser::parse() {
 /// This function was inspired by code on this website:
 /// https://www.tcpdump.org/pcap.html
 void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
-    auto eth = reinterpret_cast<const ether_header*>(packet);
-
+    // TODO: check ether type
+    // auto eth = reinterpret_cast<const ether_header*>(packet);
     auto size = header->len - ETH_HEADER_LEN;
     auto ip_header = reinterpret_cast<const ip*>(packet + ETH_HEADER_LEN);
     int ip_header_len = ip_header->ip_hl * 4;

@@ -11,8 +11,6 @@ Args Args::parse(std::span<char*> argv) {
     argv = argv.subspan(1);
 
     for (auto arg = argv.begin(); arg != argv.end(); ++arg) {
-        char* pos;
-
         if (std::strcmp(*arg, "-a") == 0) {
             args.active = std::chrono::seconds(
                 Args::parse_num(arg, argv.end())

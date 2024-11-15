@@ -34,10 +34,10 @@ struct Flow {
     Flow(FlowKey key, std::chrono::system_clock::time_point uptime):
         src_addr(key.src_addr),
         dst_addr(key.dst_addr),
+        first(uptime),
+        last(uptime),
         src_port(key.src_port),
         dst_port(key.dst_port),
-        tos(key.tos),
-        first(uptime),
-        last(uptime)
+        tos(key.tos)
     {}
 };
