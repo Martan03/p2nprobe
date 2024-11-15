@@ -57,6 +57,8 @@ void Parser::process_packet(pcap_pkthdr *header, const u_char *packet) {
     process_ip(parsed, packet + ETH_HEADER_LEN);
 }
 
+/// This function was inspired by code on this website:
+/// https://www.tcpdump.org/pcap.html
 void Parser::process_ip(Packet parsed, const u_char *packet) {
     auto ip_header = reinterpret_cast<const ip*>(packet);
     int ip_header_len = ip_header->ip_hl * 4;
@@ -77,6 +79,8 @@ void Parser::process_ip(Packet parsed, const u_char *packet) {
     process_tcp(parsed, packet + ip_header_len);
 }
 
+/// This function was inspired by code on this website:
+/// https://www.tcpdump.org/pcap.html
 void Parser::process_tcp(Packet parsed, const u_char *packet) {
     auto tcp_header = reinterpret_cast<const tcphdr*>(packet);
 

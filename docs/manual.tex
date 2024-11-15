@@ -121,14 +121,15 @@ Implementace flow exporéru by se dala rozdělit do tří hlavních částí:
 
 \subsection{Přijetí a parsování paketu}
 
-Samotná implementace přijetí a parsování paketu je pomocí knihovny pcap. Ta
-umožňuje čtení PCAP souboru a následné čtení jednotlivých paketů. Každý paket
-se následně parsuje, aby se získaly všechna potřebná data. Tuto funkcionalitu
-přijimání paketu imlementuje metoda parse ve třídě Parser (soubor parser.cpp).
+Samotná implementace přijetí a parsování paketu je pomocí knihovny
+\texttt{pcap}. Ta umožňuje čtení PCAP souboru a následné čtení jednotlivých
+paketů. Každý paket se následně parsuje, aby se získaly všechna potřebná data.
+Tuto funkcionalitu přijimání paketu imlementuje metoda \texttt{parse} ve třídě
+\texttt{Parser} (soubor \texttt{parser.cpp}).
 
 Parsování paketů je v podstatě pouze přetypování bytů dat na odpovídající
-strukturu, jako třeba ip, tcphdr. Následně se z těchto struktur dá přečíst
-potřebná data.
+strukturu, jako třeba \texttt{ip}, \texttt{tcphdr}. Následně se z těchto
+struktur dá přečíst potřebná data.
 
 \subsection{Seskupování paketů do flows}
 
@@ -138,8 +139,8 @@ verzi 5 je jednoznačně identifikována pomocí klíče, který byl popsán v s
 
 V samotné implementaci nám ale budou stačit pouze některé hodnoty z výše
 uvedené jednoznačné identifikace. Implementovaný exportér podporuje pouze
-komunikaci TCP, nepotřebujeme tedy číslo IP protokolu. Nebudeme také potřebovat
-rozhraní ingres. Výsledný klíč flow bude tedy vypadat následovně:
+komunikaci TCP, nepotřebujeme tedy číslo IP protokolu. Nebudeme také \\
+potřebovat rozhraní ingres. Výsledný klíč flow bude tedy vypadat následovně:
 \begin{itemize}
     \item Zdrojová IP adresa
     \item Cílová IP adresa
@@ -148,13 +149,25 @@ rozhraní ingres. Výsledný klíč flow bude tedy vypadat následovně:
     \item Typ služby IP (ToS)
 \end{itemize}
 
-Tento klíč je implementován jako struktura FlowKey, která obsahuje jak potřebné
-hodnoty, tak i implementuje hašování.
+Tento klíč je implementován jako struktura \texttt{FlowKey}, která obsahuje jak
+potřebné hodnoty, tak i implementuje hašování.
 
 Z přijatého a parsovaného paketu se sestaví výše zmíněný klíč, na základě
 kterého se upraví existující flow nebo vytvoří nová v případě, že ještě
 neexistuje. Do flow jsou uloženy veškeré informace, které má flow obsahovat
 (dle popisu v sekci \hyperref[sec:flow-record]{flow záznam}).
+
+\subsubsection{Konkrétní popis implementace}
+Pro parsování paketů mám několik funkcí. První funkce je
+\texttt{process\_packet}, která získá Ethernet packet a ověří, zda Ethernet
+type je IP. Následní uloží velikost L3 v bytech a čas z hlavičky paketu a
+zavolá funkci \texttt{process\_ip}. Ta získá IP header a ověří, zda
+délka této hlavička je minimálně 20 bytů a že protokol je TCP. Z IP hlavička
+dále zjistí zdrojovou a cílovou IP adresu a také typ IP služby (ToS) a zavolá
+funkci \texttt{process\_tcp}. Jak název této funkce napovídá, získá TCP
+hlavičku, ze které přečte zdrojový a cílový port a TCP flagy. Nakonec ověří,
+jestli již existuje flow pro daný paket a buď zavolá funkci pro úpravu nebo
+pro vytvoření nové flow.
 
 \subsection{Exportování flows}
 
@@ -193,7 +206,22 @@ plně naplněn.
 
 \section{Návod na použití}
 Pro spuštění programu samotného je nejprve potřeba ho kompilovat, to můžeme
-udělat spuštěním Makefile (příkaz \texttt{make}).
+udělat spuštěním Makefile (příkaz \texttt{make}). To vytvoří soubor
+\texttt{p2nprobe} v root složce, který můžeme spustit.
+
+\subsection{Nápověda}
+Pro vypsání nápovědy obsahující veškeré použití je možné program spustit takto:
+\begin{verbatim}
+    ./p2nprobe -h
+\end{verbatim}
+
+\subsection{Příklad použití}
+Pokud by jsme chtěli exportovat daný soubor PCAP na daný kolektor a navíc
+nastavit neaktivní timeout na 15 sekund a aktivní na 30 sekund, pak by jsme
+program spustili takto:
+\begin{verbatim}
+    ./p2nprobe you_file.pcap localhost:4679 -i 15 -a 30
+\end{verbatim}
 
 \section{Testování}
 Abych si mohl otestovat, že se Netflow exportuje jak má, tak jsem si

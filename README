@@ -41,6 +41,17 @@ flows.
 
 ## Příklad spuštění
 
+Nejdříve je program potřeba zkompilovat. To se udělá spuštěním Makefile pomocí
+příkazu `Make`. Poté již můžeme spustit program samotný.
+
+Zobrazit nápovědu můžeme takto:
+```
+./p2nprobe -h
+```
+
+Exportovat daný PCAP soubor na daný kolektor s aktivním timeoutem 30 sekund a
+neaktivním 15 sekund, můžeme takto:
+
 ```
 ./p2nprobe localhost:2055 pcap_soubor.pcap -a 30 -i 15
 ```
