@@ -8,6 +8,6 @@ $(NAME).pdf: $(NAME).tex $(NAME).bib
 
 .PHONY:
 clean:
-	rm -f $(NAME).aux $(NAME).bbl $(NAME).bcf $(NAME).blg $(NAME).log \
-		$(NAME).run.xml $(NAME).pdf
+	rm -f *.aux *.bbl *.bcf *.blg *.log *.run.xml *.pdf *.fdb_latexmk *.fls \
+		*.out *.synctex.gz *.toc
 

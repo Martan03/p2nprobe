@@ -13,6 +13,10 @@ build:
 run: build
 	./p2nprobe
 
+.PHONY: docs
+docs:
+	cd docs && make
+
 .PHONY: submit
 submit:
 	./submit.sh
@@ -20,4 +24,5 @@ submit:
 
 .PHONY: clean
 clean:
+	cd docs && make clean
 	rm -r build obj $(login) $(login).tar p2nprobe
